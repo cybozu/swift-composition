@@ -1,0 +1,79 @@
+name: Deploy DocC
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - .gitignore
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.0.app/Contents/Developer
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build DocC
+        run: |
+          xcodebuild build \
+            -scheme swift-composition-Package \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath DerivedData
+
+          PRODUCTS=DerivedData/Build/Products/Debug-iphoneos
+          SDK=$(xcrun --show-sdk-path --sdk iphoneos)
+          TARGET=arm64-apple-ios$(xcrun --show-sdk-version --sdk iphoneos)
+          mkdir -p symbol-graphs
+
+          xcrun swift-symbolgraph-extract \
+            -module-name Composition \
+            -target $TARGET \
+            -sdk $SDK \
+            -I $PRODUCTS \
+            -output-dir symbol-graphs
+
+          xcrun swift-symbolgraph-extract \
+            -module-name CompositionTesting \
+            -target $TARGET \
+            -sdk $SDK \
+            -I $PRODUCTS \
+            -output-dir symbol-graphs
+
+          xcrun docc convert Documentation.docc \
+            --additional-symbol-graph-dir symbol-graphs \
+            --fallback-display-name swift-composition \
+            --fallback-bundle-identifier com.cybozu.swift-composition \
+            --fallback-bundle-version 1 \
+            --output-path ./docs \
+            --transform-for-static-hosting \
+            --hosting-base-path swift-composition
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+  deploy:
+    runs-on: ubuntu-slim
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: "https://cybozu.github.io/swift-composition/documentation/swift-composition"
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
