@@ -12,7 +12,7 @@ DerivedData/
 
 # Swift DocC
 docs/
-symbol-graphs/
+merged.doccarchive
 
 # Test
 TestResults/
