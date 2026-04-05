@@ -1,0 +1,34 @@
+name: Examples Test
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_26.2.0.app/Contents/Developer"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Show Xcode Version
+        run: xcodebuild -version
+
+      - name: Run Examples Tests
+        run: |
+          xcodebuild test \
+            -project Examples/Examples.xcodeproj \
+            -scheme Examples \
+            -testPlan ExamplesTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -resultBundlePath TestResults/examples_test_result_bundle | \
+            xcbeautify && exit ${PIPESTATUS[0]}
