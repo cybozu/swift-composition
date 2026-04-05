@@ -22,6 +22,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		185A19322F825CF80043C4C9 /* swift-composition */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "swift-composition"; path = ..; sourceTree = "<group>"; };
 		818C94B52F504D570001C612 /* Examples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Examples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		818C94C22F504D5C0001C612 /* ExamplesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExamplesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -62,6 +63,7 @@
 		818C94AC2F504D570001C612 = {
 			isa = PBXGroup;
 			children = (
+				185A19322F825CF80043C4C9 /* swift-composition */,
 				818C94B72F504D570001C612 /* Examples */,
 				818C94C52F504D5C0001C612 /* ExamplesTests */,
 				818C94B62F504D570001C612 /* Products */,
@@ -156,7 +158,6 @@
 			mainGroup = 818C94AC2F504D570001C612;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				818C94E92F508C290001C612 /* XCLocalSwiftPackageReference "../../swift-composition" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 818C94B62F504D570001C612 /* Products */;
@@ -491,13 +492,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		818C94E92F508C290001C612 /* XCLocalSwiftPackageReference "../../swift-composition" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../../swift-composition";
-		};
-/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		818C94EA2F508C290001C612 /* Composition */ = {
