@@ -1,4 +1,7 @@
-# Composition
+<picture>
+  <source srcset="https://github.com/user-attachments/assets/956a212c-76e0-4513-9d20-e1f2918f473c" height="70" media="(prefers-color-scheme: dark)" alt="LicenseList by Cybozu">
+  <img src="https://github.com/user-attachments/assets/e5338451-dbdc-4dc0-898a-050c0e62169d" height="70" alt="LicenseList by Cybozu">
+</picture>
 
 ![Swift 6.3](https://img.shields.io/badge/Swift-6.3-F05138.svg?style=flat&logo=swift)
 ![Platforms](https://img.shields.io/badge/Platforms-iOS_26_|_macOS_26_|_watchOS_26_|_tvOS_26-blue.svg)
