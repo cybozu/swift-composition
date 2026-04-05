@@ -2,13 +2,15 @@
   "configurations" : [
     {
       "id" : "3B679B66-26E7-4D7C-A055-E584C6FEFE8F",
-      "name" : "Configuration 1",
+      "name" : "Test Scheme Action",
       "options" : {
 
       }
     }
   ],
   "defaultOptions" : {
+    "codeCoverage" : false,
+    "language" : "en",
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
