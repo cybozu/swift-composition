@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "3B679B66-26E7-4D7C-A055-E584C6FEFE8F",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..",
+        "identifier" : "CompositionTests",
+        "name" : "CompositionTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..",
+        "identifier" : "CompositionTestingTests",
+        "name" : "CompositionTestingTests"
+      }
+    }
+  ],
+  "version" : 1
+}
