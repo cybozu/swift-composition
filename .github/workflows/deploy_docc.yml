@@ -25,37 +25,21 @@ jobs:
 
       - name: Build DocC
         run: |
-          xcodebuild build \
+          xcodebuild docbuild \
             -scheme swift-composition-Package \
             -destination "generic/platform=iOS" \
             -derivedDataPath DerivedData
 
-          PRODUCTS=DerivedData/Build/Products/Debug-iphoneos
-          SDK=$(xcrun --show-sdk-path --sdk iphoneos)
-          TARGET=arm64-apple-ios$(xcrun --show-sdk-version --sdk iphoneos)
-          mkdir -p symbol-graphs
+          ARCHIVES=DerivedData/Build/Products/Debug-iphoneos
 
-          xcrun swift-symbolgraph-extract \
-            -module-name Composition \
-            -target $TARGET \
-            -sdk $SDK \
-            -I $PRODUCTS \
-            -output-dir symbol-graphs
+          xcrun docc merge \
+            $ARCHIVES/Composition.doccarchive \
+            $ARCHIVES/CompositionTesting.doccarchive \
+            --output-path merged.doccarchive
 
-          xcrun swift-symbolgraph-extract \
-            -module-name CompositionTesting \
-            -target $TARGET \
-            -sdk $SDK \
-            -I $PRODUCTS \
-            -output-dir symbol-graphs
-
-          xcrun docc convert Documentation.docc \
-            --additional-symbol-graph-dir symbol-graphs \
-            --fallback-display-name swift-composition \
-            --fallback-bundle-identifier com.cybozu.swift-composition \
-            --fallback-bundle-version 1 \
+          xcrun docc process-archive \
+            transform-for-static-hosting merged.doccarchive \
             --output-path ./docs \
-            --transform-for-static-hosting \
             --hosting-base-path swift-composition
 
       - name: Upload artifact
@@ -71,7 +55,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: "https://cybozu.github.io/swift-composition/documentation/swift-composition"
+      url: "https://cybozu.github.io/swift-composition/documentation/"
 
     steps:
       - name: Deploy to GitHub Pages
