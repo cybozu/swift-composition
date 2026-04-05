@@ -1,8 +1,18 @@
+# Mac
 .DS_Store
-/.build
-/Packages
+
+# Xcode
 xcuserdata/
+*.xcuserstate
 DerivedData/
-.swiftpm/configuration/registries.json
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.netrc
+
+# Swift Package Manager
+/.build
+/.swiftpm
+
+# Swift DocC
+docs/
+symbol-graphs/
+
+# Test
+TestResults/
