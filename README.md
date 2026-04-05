@@ -262,6 +262,10 @@ Or in Xcode, go to **File > Add Package Dependencies** and paste the repository 
 
 For a complete working example, see the [Todo app](Examples/) in the Examples directory.
 
+## Privacy Manifest
+
+This library does not collect or track user information, so it does not include a PrivacyInfo.xcprivacy file.
+
 ## License
 
 This project is released under the MIT License. See [LICENSE](LICENSE) for details.
