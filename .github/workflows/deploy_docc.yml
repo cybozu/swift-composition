@@ -27,10 +27,10 @@ jobs:
         run: |
           xcodebuild docbuild \
             -scheme swift-composition-Package \
-            -destination "generic/platform=iOS" \
+            -destination "generic/platform=macOS" \
             -derivedDataPath DerivedData
 
-          ARCHIVES=DerivedData/Build/Products/Debug-iphoneos
+          ARCHIVES=DerivedData/Build/Products/Debug
 
           xcrun docc merge \
             $ARCHIVES/Composition.doccarchive \
