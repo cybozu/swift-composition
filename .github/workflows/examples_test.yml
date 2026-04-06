@@ -27,8 +27,6 @@ jobs:
           xcodebuild test \
             -project Examples/Examples.xcodeproj \
             -scheme Examples \
-            -testPlan ExamplesTests \
             -destination "platform=macOS" \
-            -derivedDataPath DerivedData \
-            -resultBundlePath TestResults/examples_test_result_bundle | \
+            -derivedDataPath DerivedData | \
             xcbeautify && exit ${PIPESTATUS[0]}
