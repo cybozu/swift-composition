@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		185A19422F825E8C0043C4C9 /* ModulesTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 185A19412F825E8C0043C4C9 /* ModulesTests.xctestplan */; };
-		185A198E2F8260500043C4C9 /* ExamplesTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 185A198D2F8260500043C4C9 /* ExamplesTests.xctestplan */; };
 		818C94EB2F508C290001C612 /* Composition in Frameworks */ = {isa = PBXBuildFile; productRef = 818C94EA2F508C290001C612 /* Composition */; };
 		818C94ED2F508C290001C612 /* CompositionTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 818C94EC2F508C290001C612 /* CompositionTesting */; };
 /* End PBXBuildFile section */
@@ -25,8 +23,6 @@
 
 /* Begin PBXFileReference section */
 		185A19322F825CF80043C4C9 /* swift-composition */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "swift-composition"; path = ..; sourceTree = "<group>"; };
-		185A19412F825E8C0043C4C9 /* ModulesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = ModulesTests.xctestplan; sourceTree = "<group>"; };
-		185A198D2F8260500043C4C9 /* ExamplesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = ExamplesTests.xctestplan; sourceTree = "<group>"; };
 		818C94B52F504D570001C612 /* Examples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Examples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		818C94C22F504D5C0001C612 /* ExamplesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExamplesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -67,8 +63,6 @@
 		818C94AC2F504D570001C612 = {
 			isa = PBXGroup;
 			children = (
-				185A198D2F8260500043C4C9 /* ExamplesTests.xctestplan */,
-				185A19412F825E8C0043C4C9 /* ModulesTests.xctestplan */,
 				185A19322F825CF80043C4C9 /* swift-composition */,
 				818C94B72F504D570001C612 /* Examples */,
 				818C94C52F504D5C0001C612 /* ExamplesTests */,
@@ -181,8 +175,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				185A198E2F8260500043C4C9 /* ExamplesTests.xctestplan in Resources */,
-				185A19422F825E8C0043C4C9 /* ModulesTests.xctestplan in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
