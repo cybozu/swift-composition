@@ -3,7 +3,7 @@
 @Metadata {
     @PageImage(
         purpose: icon,
-        source: "logo",
+        source: "logo-testing",
         alt: "An icon representing the CompositionTesting."
     )
     @PageColor(orange)
