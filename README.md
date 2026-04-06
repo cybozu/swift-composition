@@ -261,6 +261,8 @@ Or in Xcode, go to **File > Add Package Dependencies** and paste the repository 
 
 ## Documentation
 
+For more in-depth infomation, see [API Documentation](https://cybozu.github.io/swift-composition/documentation/).
+
 For a complete working example, see the [Todo app](Examples/) in the Examples directory.
 
 ## License
