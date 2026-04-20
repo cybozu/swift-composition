@@ -3,7 +3,7 @@
   <img src="https://github.com/user-attachments/assets/6fa80241-16bb-494a-9870-86fea13df69f" height="70" alt="LicenseList by Cybozu">
 </picture>
 
-![Swift 6.3](https://img.shields.io/badge/Swift-6.3-F05138.svg?style=flat&logo=swift)
+![Swift 6.2](https://img.shields.io/badge/Swift-6.2-F05138.svg?style=flat&logo=swift)
 ![Platforms](https://img.shields.io/badge/Platforms-iOS_26_|_macOS_26_|_watchOS_26_|_tvOS_26_|_visionOS_26-blue.svg)
 ![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)
@@ -223,7 +223,7 @@ func addingTodoFiresTrigger() async {
 
 |  | Minimum Version |
 |---|---|
-| Swift | 6.3 |
+| Swift | 6.2 |
 | Xcode | 26.0 |
 | iOS | 26.0 |
 | macOS | 26.0 |
