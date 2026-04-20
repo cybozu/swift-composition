@@ -224,7 +224,7 @@ func addingTodoFiresTrigger() async {
 |  | Minimum Version |
 |---|---|
 | Swift | 6.3 |
-| Xcode | 26.0 |
+| Xcode | 26.4 |
 | iOS | 26.0 |
 | macOS | 26.0 |
 | watchOS | 26.0 |
