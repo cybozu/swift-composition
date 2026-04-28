@@ -24,11 +24,13 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Build DocC
+        shell: bash
         run: |
           xcodebuild docbuild \
             -scheme swift-composition-Package \
             -destination "generic/platform=macOS" \
-            -derivedDataPath DerivedData
+            -derivedDataPath DerivedData | \
+            xcbeautify
 
           ARCHIVES=DerivedData/Build/Products/Debug
 
