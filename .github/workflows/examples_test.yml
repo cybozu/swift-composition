@@ -23,10 +23,11 @@ jobs:
         run: xcodebuild -version
 
       - name: Run Examples Tests
+        shell: bash
         run: |
           xcodebuild test \
             -project Examples/Examples.xcodeproj \
             -scheme Examples \
             -destination "platform=macOS" \
             -derivedDataPath DerivedData | \
-            xcbeautify && exit ${PIPESTATUS[0]}
+            xcbeautify
