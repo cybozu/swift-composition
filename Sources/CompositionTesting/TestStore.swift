@@ -3,10 +3,12 @@ import Composition
 /// A testing wrapper for `Composable` stores that gives deterministic control over re-entrant actions.
 ///
 /// `TestStore` can send actions, mutate state directly, and suspend follow-up effects until `resume()` is called.
+/// It captures the task-local values bound at its creation, and every action it processes runs with those values.
 @MainActor @dynamicMemberLookup
 public final class TestStore<Root: Composable, Store: Composable> {
     private let store: Store
     private let coordinator: ContinuationCoordinator
+    private let runner: OperationRunner
 
     /// Creates a root test store.
     ///
@@ -14,11 +16,13 @@ public final class TestStore<Root: Composable, Store: Composable> {
     public init(makeStore: () -> Store) where Root == Store {
         store = makeStore()
         coordinator = .init()
+        runner = .init()
     }
 
-    private init(store: Store, coordinator: ContinuationCoordinator) {
+    private init(store: Store, coordinator: ContinuationCoordinator, runner: OperationRunner) {
         self.store = store
         self.coordinator = coordinator
+        self.runner = runner
     }
 
     deinit {
@@ -33,7 +37,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
     /// - Parameter target: A key path from the current store to a child store.
     /// - Returns: A `TestStore` that targets the child store.
     public func scope<Target: Composable>(to target: KeyPath<Store, Target>) -> TestStore<Root, Target> {
-        .init(store: store[keyPath: target], coordinator: coordinator)
+        .init(store: store[keyPath: target], coordinator: coordinator, runner: runner)
     }
 
     /// Creates a scoped test store for an optional child store.
@@ -42,7 +46,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
     /// - Returns: A scoped `TestStore` if the child store exists; otherwise `nil`.
     public func scope<Target: Composable>(to target: KeyPath<Store, Target?>) -> TestStore<Root, Target>? {
         store[keyPath: target].map {
-            .init(store: $0, coordinator: coordinator)
+            .init(store: $0, coordinator: coordinator, runner: runner)
         }
     }
 
@@ -61,7 +65,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
-            Task.immediate { [weak self] in
+            runner.enqueue { [weak self] in
                 guard let coordinator = self?.coordinator else {
                     return
                 }
@@ -94,7 +98,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
-            Task.immediate { [weak self] in
+            runner.enqueue { [weak self] in
                 guard let coordinator = self?.coordinator else {
                     return
                 }

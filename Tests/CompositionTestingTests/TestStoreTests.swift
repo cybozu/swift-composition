@@ -599,6 +599,184 @@ struct TestStoreTests {
         #expect(store.handler1CalledCount == 1)
         #expect(store.handler2CalledCount == 1)
     }
+
+    /// preconditions: a store created inside a task-local binding
+    /// expectations: send applies the task-local value bound at store creation
+    @Test @MainActor
+    func sendAppliesTaskLocalValueBoundAtStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await store.send(.read)
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding
+    /// expectations: set applies the task-local value bound at store creation to trigger-fired actions
+    @Test @MainActor
+    func setAppliesTaskLocalValueBoundAtStoreCreationToTriggerFiredActions() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await store.set(\.count, to: 1)
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding and a suspended trigger-fired action
+    /// expectations: resumed trigger-fired action applies the task-local value bound at store creation
+    @Test @MainActor
+    func resumedTriggerFiredActionAppliesTaskLocalValueBoundAtStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await store.send(.increment)
+
+        #expect(store.observedValues.isEmpty)
+
+        await store.resume()
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding and a suspended cascading trigger-fired action
+    /// expectations: resumed cascading trigger-fired action after set applies the task-local value bound at store creation
+    @Test @MainActor
+    func resumedCascadingTriggerFiredActionAfterSetAppliesTaskLocalValueBoundAtStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { CascadingTaskLocalReader() }
+        }
+
+        await store.set(\.count, to: 1)
+
+        #expect(store.observedValues.isEmpty)
+
+        await store.resume()
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding whose child delegates via action mapping
+    /// expectations: resumed delegate-driven action applies the task-local value bound at store creation
+    @Test @MainActor
+    func resumedDelegateDrivenActionAppliesTaskLocalValueBoundAtStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalDelegateParent() }
+        }
+
+        await store.scope(to: \.child).send(.incrementButtonTapped)
+
+        #expect(store.observedValues.isEmpty)
+
+        await store.resume()
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding and send wrapped in a different binding
+    /// expectations: send applies store creation task-local value over send site value
+    @Test @MainActor
+    func sendAppliesStoreCreationTaskLocalValueOverSendSiteValue() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await ContextValue.$current.withValue("send-site") {
+            await store.send(.read)
+        }
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a store created inside a task-local binding and set wrapped in a different binding
+    /// expectations: set applies store creation task-local value over set site value
+    @Test @MainActor
+    func setAppliesStoreCreationTaskLocalValueOverSetSiteValue() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await ContextValue.$current.withValue("set-site") {
+            await store.set(\.count, to: 1)
+        }
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
+    /// preconditions: two stores created inside different task-local bindings
+    /// expectations: each store applies the task-local value bound at its own creation
+    @Test @MainActor
+    func eachStoreAppliesTaskLocalValueBoundAtItsOwnCreation() async {
+        let firstStore = ContextValue.$current.withValue("first-store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        let secondStore = ContextValue.$current.withValue("second-store-site") {
+            TestStore { TaskLocalReader() }
+        }
+
+        await firstStore.send(.read)
+        await secondStore.send(.read)
+
+        #expect(firstStore.observedValues == ["first-store-site"])
+        #expect(secondStore.observedValues == ["second-store-site"])
+    }
+
+    /// preconditions: a parent store created inside a task-local binding and a scoped child test store
+    /// expectations: scoped send applies the task-local value bound at root store creation
+    @Test @MainActor
+    func scopedSendAppliesTaskLocalValueBoundAtRootStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { ChildParent(child: TaskLocalReader()) }
+        }
+
+        await store.scope(to: \.child).send(.read)
+
+        #expect(store.child.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a parent store created inside a task-local binding and a scoped child test store
+    /// expectations: scoped set applies the task-local value bound at root store creation
+    @Test @MainActor
+    func scopedSetAppliesTaskLocalValueBoundAtRootStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { ChildParent(child: TaskLocalReader()) }
+        }
+
+        await store.scope(to: \.child).set(\.count, to: 1)
+
+        #expect(store.child.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a parent store created inside a task-local binding and a non-nil optional child
+    /// expectations: optional scoped send applies the task-local value bound at root store creation
+    @Test @MainActor
+    func optionalScopedSendAppliesTaskLocalValueBoundAtRootStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { ChildParent<TaskLocalReader?>(child: TaskLocalReader()) }
+        }
+
+        await store.scope(to: \.child)?.send(.read)
+
+        #expect(store.child?.observedValues == ["store-site"])
+    }
+
+    /// preconditions: a parent store created inside a task-local binding and a non-nil optional child
+    /// expectations: optional scoped set applies the task-local value bound at root store creation
+    @Test @MainActor
+    func optionalScopedSetAppliesTaskLocalValueBoundAtRootStoreCreation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { ChildParent<TaskLocalReader?>(child: TaskLocalReader()) }
+        }
+
+        await store.scope(to: \.child)?.set(\.count, to: 1)
+
+        #expect(store.child?.observedValues == ["store-site"])
+    }
 }
 
 private struct TestIssueRecorder: IssueRecordable {
@@ -859,5 +1037,92 @@ private final class DualTriggerCounter: Composable {
     enum Action {
         case countDidChange1
         case countDidChange2
+    }
+}
+
+private enum ContextValue {
+    @TaskLocal static var current = "default"
+}
+
+@MainActor @Observable
+private final class TaskLocalReader: Composable {
+    struct State {
+        var count = 0
+        var observedValues: [String] = []
+    }
+
+    var state = State()
+    let delegate: @MainActor (Action) async -> Void = { _ in }
+
+    @ObservationIgnored lazy var triggers: [Trigger<State, Action>] = [
+        trigger(.countDidChange, observing: \.count),
+    ]
+
+    func reduce(_ action: Action) async {
+        switch action {
+        case .increment:
+            state.count += 1
+        case .read, .countDidChange:
+            state.observedValues.append(ContextValue.current)
+        }
+    }
+
+    enum Action {
+        case increment
+        case read
+        case countDidChange
+    }
+}
+
+@MainActor @Observable
+private final class CascadingTaskLocalReader: Composable {
+    struct State {
+        var count = 0
+        var doubledCount = 0
+        var observedValues: [String] = []
+    }
+
+    var state = State()
+    let delegate: @MainActor (Action) async -> Void = { _ in }
+
+    @ObservationIgnored lazy var triggers: [Trigger<State, Action>] = [
+        trigger(.countDidChange, observing: \.count),
+        trigger(.doubledCountDidChange, observing: \.doubledCount),
+    ]
+
+    func reduce(_ action: Action) async {
+        switch action {
+        case .countDidChange:
+            state.doubledCount = state.count * 2
+        case .doubledCountDidChange:
+            state.observedValues.append(ContextValue.current)
+        }
+    }
+
+    enum Action {
+        case countDidChange
+        case doubledCountDidChange
+    }
+}
+
+@MainActor @Observable
+private final class TaskLocalDelegateParent: Composable {
+    struct State {
+        var observedValues: [String] = []
+    }
+
+    var state = State()
+    @ObservationIgnored lazy var child = Child(delegate: mapAction { .child($0) })
+    let delegate: @MainActor (Action) async -> Void = { _ in }
+
+    func reduce(_ action: Action) async {
+        switch action {
+        case .child(.incrementButtonTapped):
+            state.observedValues.append(ContextValue.current)
+        }
+    }
+
+    enum Action {
+        case child(Child.Action)
     }
 }

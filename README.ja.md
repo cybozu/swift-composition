@@ -219,6 +219,25 @@ func addingTodoFiresTrigger() async {
 }
 ```
 
+`TestStore` は生成時に束縛されていたタスクローカル値を捕捉し、`send`、`set`、`resume` で処理されるすべてのアクション（再入する `send` やトリガーのカスケードを含む）はその値の下で実行されます。そのためタスクローカル値は、テストダブルを注入する自然な継ぎ目になります。ストアの生成箇所で一度束縛すれば、`send` ごとに包む必要はありません：
+
+```swift
+enum FetchTodos {
+    @TaskLocal static var current: () async -> [Todo] = { [] }
+}
+
+@Test @MainActor
+func fetchesTodos() async {
+    let store = FetchTodos.$current.withValue({ [Todo(title: "Buy milk")] }) {
+        TestStore { TodoList() }
+    }
+
+    // この send は withValue のスコープ外だが、ストア生成時に束縛された値が見える
+    // 個々の send を包んだタスクローカル値はアクションの実行には伝播しない
+    await store.send(.refreshButtonTapped)
+}
+```
+
 ## 動作要件
 
 |  | 最小バージョン |

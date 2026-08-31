@@ -219,6 +219,26 @@ func addingTodoFiresTrigger() async {
 }
 ```
 
+`TestStore` captures the task-local values bound at its creation, and every action processed through `send`, `set`, and `resume` — including re-entrant sends and trigger cascades — runs with those values. This makes task-local values a natural seam for injecting test doubles: bind them once around the store's creation, with no need to wrap each `send`:
+
+```swift
+enum FetchTodos {
+    @TaskLocal static var current: () async -> [Todo] = { [] }
+}
+
+@Test @MainActor
+func fetchesTodos() async {
+    let store = FetchTodos.$current.withValue({ [Todo(title: "Buy milk")] }) {
+        TestStore { TodoList() }
+    }
+
+    // The value bound at store creation is visible here, even though this
+    // send is outside the withValue scope. Task-local values bound around
+    // an individual send do not propagate into action execution.
+    await store.send(.refreshButtonTapped)
+}
+```
+
 ## Requirements
 
 |  | Minimum Version |
