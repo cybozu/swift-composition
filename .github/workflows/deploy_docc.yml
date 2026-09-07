@@ -37,6 +37,7 @@ jobs:
           xcrun docc merge \
             $ARCHIVES/Composition.doccarchive \
             $ARCHIVES/CompositionTesting.doccarchive \
+            --synthesized-landing-page-name swift-composition \
             --output-path merged.doccarchive
 
           xcrun docc process-archive \
