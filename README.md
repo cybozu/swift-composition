@@ -219,7 +219,7 @@ func addingTodoFiresTrigger() async {
 }
 ```
 
-`TestStore` captures the task-local values bound at its creation, and every action processed through `send`, `set`, and `resume` — including re-entrant sends and trigger cascades — runs with those values. This makes task-local values a natural seam for injecting test doubles: bind them once around the store's creation, with no need to wrap each `send`:
+`TestStore` captures the task-local values bound at its creation, and every action processed through `send`, `set`, and `resume` — including re-entrant sends and trigger cascades — as well as the state mutation performed by `set`, runs with those values. This makes task-local values a natural seam for injecting test doubles: bind them once around the store's creation, with no need to wrap each `send` or `set`:
 
 ```swift
 enum FetchTodos {

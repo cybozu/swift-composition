@@ -3,7 +3,8 @@ import Composition
 /// A testing wrapper for `Composable` stores that gives deterministic control over re-entrant actions.
 ///
 /// `TestStore` can send actions, mutate state directly, and suspend follow-up effects until `resume()` is called.
-/// It captures the task-local values bound at its creation, and every action it processes runs with those values.
+/// It captures the task-local values bound at its creation, and every action it processes, as well as every state
+/// mutation made through `set(_:to:)`, runs with those values.
 @MainActor @dynamicMemberLookup
 public final class TestStore<Root: Composable, Store: Composable> {
     private let store: Store
@@ -66,12 +67,12 @@ public final class TestStore<Root: Composable, Store: Composable> {
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
             runner.enqueue { [weak self] in
-                guard let coordinator = self?.coordinator else {
+                guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
                 }
 
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
-                    await self?.store.send(action)
+                    await store.send(action)
                     coordinator.dispatcherContinuation.resumeOnce()
                 }
             }
@@ -93,18 +94,17 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
         coordinator.reset()
 
-        let oldState = store.state
-        store.state[keyPath: keyPath] = value
-
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
             runner.enqueue { [weak self] in
-                guard let coordinator = self?.coordinator else {
+                guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
                 }
 
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
-                    await self?.store.fireTriggers(from: oldState)
+                    let oldState = store.state
+                    store.state[keyPath: keyPath] = value
+                    await store.fireTriggers(from: oldState)
                     coordinator.dispatcherContinuation.resumeOnce()
                 }
             }
