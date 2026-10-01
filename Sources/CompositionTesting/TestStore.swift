@@ -3,7 +3,8 @@ import Composition
 /// A testing wrapper for `Composable` stores that gives deterministic control over re-entrant actions.
 ///
 /// `TestStore` can send actions, mutate state directly, and suspend follow-up effects until `resume()` is called.
-/// It captures the task-local values bound at its creation, and every action it processes runs with those values.
+/// It captures the task-local values bound at its creation, and every action it processes, as well as every state
+/// mutation made through `set(_:to:)`, runs with those values.
 @MainActor @dynamicMemberLookup
 public final class TestStore<Root: Composable, Store: Composable> {
     private let store: Store
@@ -80,6 +81,9 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
     /// Performs work on the store under test by mutating state and evaluating triggers.
     ///
+    /// The state mutation and the trigger evaluation both run with the task-local values bound at the
+    /// test store's creation, so state setters that read task-local values see those bindings.
+    ///
     /// If another action is already suspended, this method records a test issue and returns.
     ///
     /// - Parameters:
@@ -93,18 +97,18 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
         coordinator.reset()
 
-        let oldState = store.state
-        store.state[keyPath: keyPath] = value
-
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
             runner.enqueue { [weak self] in
-                guard let coordinator = self?.coordinator else {
+                guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
                 }
 
+                let oldState = store.state
+                store.state[keyPath: keyPath] = value
+
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
-                    await self?.store.fireTriggers(from: oldState)
+                    await store.fireTriggers(from: oldState)
                     coordinator.dispatcherContinuation.resumeOnce()
                 }
             }
