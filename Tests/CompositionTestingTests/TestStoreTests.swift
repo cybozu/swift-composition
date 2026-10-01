@@ -626,6 +626,19 @@ struct TestStoreTests {
         #expect(store.observedValues == ["store-site"])
     }
 
+    /// preconditions: a store created inside a task-local binding whose state setter reads the task-local value
+    /// expectations: set applies the task-local value bound at store creation to the state mutation
+    @Test @MainActor
+    func setAppliesTaskLocalValueBoundAtStoreCreationToStateMutation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalSetterReader() }
+        }
+
+        await store.set(\.count, to: 1)
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
     /// preconditions: a store created inside a task-local binding and a suspended trigger-fired action
     /// expectations: resumed trigger-fired action applies the task-local value bound at store creation
     @Test @MainActor
@@ -707,6 +720,21 @@ struct TestStoreTests {
         #expect(store.observedValues == ["store-site"])
     }
 
+    /// preconditions: a store created inside a task-local binding whose state setter reads the task-local value, and set wrapped in a different binding
+    /// expectations: set applies store creation task-local value to the state mutation over set site value
+    @Test @MainActor
+    func setAppliesStoreCreationTaskLocalValueToStateMutationOverSetSiteValue() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { TaskLocalSetterReader() }
+        }
+
+        await ContextValue.$current.withValue("set-site") {
+            await store.set(\.count, to: 1)
+        }
+
+        #expect(store.observedValues == ["store-site"])
+    }
+
     /// preconditions: two stores created inside different task-local bindings
     /// expectations: each store applies the task-local value bound at its own creation
     @Test @MainActor
@@ -752,6 +780,19 @@ struct TestStoreTests {
         #expect(store.child.observedValues == ["store-site"])
     }
 
+    /// preconditions: a parent store created inside a task-local binding and a scoped child whose state setter reads the task-local value
+    /// expectations: scoped set applies the task-local value bound at root store creation to the state mutation
+    @Test @MainActor
+    func scopedSetAppliesTaskLocalValueBoundAtRootStoreCreationToStateMutation() async {
+        let store = ContextValue.$current.withValue("store-site") {
+            TestStore { ChildParent(child: TaskLocalSetterReader()) }
+        }
+
+        await store.scope(to: \.child).set(\.count, to: 1)
+
+        #expect(store.child.observedValues == ["store-site"])
+    }
+
     /// preconditions: a parent store created inside a task-local binding and a non-nil optional child
     /// expectations: optional scoped send applies the task-local value bound at root store creation
     @Test @MainActor
@@ -776,47 +817,6 @@ struct TestStoreTests {
         await store.scope(to: \.child)?.set(\.count, to: 1)
 
         #expect(store.child?.observedValues == ["store-site"])
-    }
-
-    /// preconditions: a store created inside a task-local binding whose state setter reads the task-local value
-    /// expectations: set applies the task-local value bound at store creation to the state mutation
-    @Test @MainActor
-    func setAppliesTaskLocalValueBoundAtStoreCreationToStateMutation() async {
-        let store = ContextValue.$current.withValue("store-site") {
-            TestStore { TaskLocalSetterReader() }
-        }
-
-        await store.set(\.count, to: 1)
-
-        #expect(store.observedValues == ["store-site"])
-    }
-
-    /// preconditions: a store created inside a task-local binding whose state setter reads the task-local value, and set wrapped in a different binding
-    /// expectations: set applies store creation task-local value to the state mutation over set site value
-    @Test @MainActor
-    func setAppliesStoreCreationTaskLocalValueToStateMutationOverSetSiteValue() async {
-        let store = ContextValue.$current.withValue("store-site") {
-            TestStore { TaskLocalSetterReader() }
-        }
-
-        await ContextValue.$current.withValue("set-site") {
-            await store.set(\.count, to: 1)
-        }
-
-        #expect(store.observedValues == ["store-site"])
-    }
-
-    /// preconditions: a parent store created inside a task-local binding and a scoped child whose state setter reads the task-local value
-    /// expectations: scoped set applies the task-local value bound at root store creation to the state mutation
-    @Test @MainActor
-    func scopedSetAppliesTaskLocalValueBoundAtRootStoreCreationToStateMutation() async {
-        let store = ContextValue.$current.withValue("store-site") {
-            TestStore { ChildParent(child: TaskLocalSetterReader()) }
-        }
-
-        await store.scope(to: \.child).set(\.count, to: 1)
-
-        #expect(store.child.observedValues == ["store-site"])
     }
 
     /// preconditions: a parent store created inside a task-local binding and a non-nil optional child whose state setter reads the task-local value

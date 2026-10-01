@@ -67,12 +67,12 @@ public final class TestStore<Root: Composable, Store: Composable> {
         await withCheckedContinuation { continuation in
             coordinator.dispatcherContinuation = continuation
             runner.enqueue { [weak self] in
-                guard let coordinator = self?.coordinator else {
+                guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
                 }
 
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
-                    await self?.store.send(action)
+                    await store.send(action)
                     coordinator.dispatcherContinuation.resumeOnce()
                 }
             }
@@ -101,10 +101,9 @@ public final class TestStore<Root: Composable, Store: Composable> {
                     return
                 }
 
-                let oldState = store.state
-                store.state[keyPath: keyPath] = value
-
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
+                    let oldState = store.state
+                    store.state[keyPath: keyPath] = value
                     await store.fireTriggers(from: oldState)
                     coordinator.dispatcherContinuation.resumeOnce()
                 }
