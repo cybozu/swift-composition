@@ -81,9 +81,6 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
     /// Performs work on the store under test by mutating state and evaluating triggers.
     ///
-    /// The state mutation and the trigger evaluation both run with the task-local values bound at the
-    /// test store's creation, so state setters that read task-local values see those bindings.
-    ///
     /// If another action is already suspended, this method records a test issue and returns.
     ///
     /// - Parameters:
