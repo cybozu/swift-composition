@@ -27,7 +27,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
     }
 
     deinit {
-        guard Root.self != Store.self || coordinator.executorContinuation == nil else {
+        guard Root.self != Store.self || coordinator.executor.isEmpty else {
             IssueRecorder.current.record("The test finished but there is a suspended action. Call 'resume()' to resume all expected actions.")
             return
         }
@@ -57,7 +57,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
     ///
     /// - Parameter action: The action to send.
     public func send(_ action: Store.Action) async {
-        guard coordinator.executorContinuation == nil else {
+        guard coordinator.executor.isEmpty else {
             IssueRecorder.current.record("send(_:) was called but there is already a suspended action. Call 'resume()' before sending a new action.")
             return
         }
@@ -65,7 +65,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
         coordinator.reset()
 
         await withCheckedContinuation { continuation in
-            coordinator.dispatcherContinuation = continuation
+            coordinator.dispatcher.hold(continuation)
             runner.enqueue { [weak self] in
                 guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
@@ -73,7 +73,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
 
                 await EffectExecutor.$current.withValue(TestableEffectExecutor(coordinator: coordinator)) {
                     await store.send(action)
-                    coordinator.dispatcherContinuation.resumeOnce()
+                    coordinator.dispatcher.resume()
                 }
             }
         }
@@ -87,7 +87,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
     ///   - keyPath: The writable key path to mutate.
     ///   - value: The new value to assign.
     public func set<Value>(_ keyPath: WritableKeyPath<Store.State, Value>, to value: Value) async {
-        guard coordinator.executorContinuation == nil else {
+        guard coordinator.executor.isEmpty else {
             IssueRecorder.current.record("set(_:to:) was called but there is already a suspended action. Call 'resume()' before sending a new action.")
             return
         }
@@ -95,7 +95,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
         coordinator.reset()
 
         await withCheckedContinuation { continuation in
-            coordinator.dispatcherContinuation = continuation
+            coordinator.dispatcher.hold(continuation)
             runner.enqueue { [weak self] in
                 guard let coordinator = self?.coordinator, let store = self?.store else {
                     return
@@ -105,7 +105,7 @@ public final class TestStore<Root: Composable, Store: Composable> {
                     let oldState = store.state
                     store.state[keyPath: keyPath] = value
                     await store.fireTriggers(from: oldState)
-                    coordinator.dispatcherContinuation.resumeOnce()
+                    coordinator.dispatcher.resume()
                 }
             }
         }
@@ -115,13 +115,13 @@ public final class TestStore<Root: Composable, Store: Composable> {
     ///
     /// If there is no suspended action, this method records a test issue.
     public func resume() async {
-        guard coordinator.executorContinuation != nil else {
+        guard !coordinator.executor.isEmpty else {
             IssueRecorder.current.record("resume() was called but there are no suspended actions to resume.")
             return
         }
         await withCheckedContinuation { continuation in
-            coordinator.dispatcherContinuation = continuation
-            coordinator.executorContinuation.resumeOnce()
+            coordinator.dispatcher.hold(continuation)
+            coordinator.executor.resume()
         }
     }
 
