@@ -15,8 +15,8 @@ struct TestableEffectExecutor: EffectExecutable {
 
     func yield() async {
         await withCheckedContinuation { continuation in
-            coordinator.executorContinuation = continuation
-            coordinator.dispatcherContinuation.resumeOnce()
+            coordinator.executor.hold(continuation)
+            coordinator.dispatcher.resume()
         }
     }
 }
