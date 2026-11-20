@@ -29,7 +29,6 @@ final class ContinuationCoordinator: Sendable {
 
 extension CheckedContinuation<Void, Never>? {
     mutating func resumeOnce() {
-        self?.resume()
-        self = nil
+        take()?.resume()
     }
 }

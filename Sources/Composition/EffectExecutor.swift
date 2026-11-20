@@ -1,6 +1,6 @@
 package protocol EffectExecutable: Sendable {
-    func perform(_ effect: @MainActor @escaping () async -> Void) async
-    func yield() async
+    nonisolated(nonsending) func perform(_ effect: @MainActor @escaping () async -> Void) async
+    nonisolated(nonsending) func yield() async
 }
 
 package enum EffectExecutor {
